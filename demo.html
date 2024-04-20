@@ -1,28 +1,49 @@
-<h1>Hi guys!</h1>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>&lt;:-)</title>
+    <script async src="/public/vendor/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+      "imports": {
+        "@sillonious/module": "/public/module.js",
+        "braid-http": "https://esm.sh/braid-http@0.3.5",
+        "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+        "statebus": "/public/_statebus.js"
+      }
+    }
+    </script>
 
-You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
+  </head>
+  <body>
+    <h1>Hi guys!</h1>
 
-<h2>Feed</h2>
-<pre id=feed-pre></pre>
-<div id=feed-post></div>
-<br>
-<textarea id=subject placeholder=subject></textarea>
-<textarea id=body placeholder=body></textarea>
-<input type=button value='new post' onclick='make_new_post()' />
-  
+    You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
 
-<script type=module>
-  import * as braid from 'https://esm.sh/braid-http@0.3.5'
-  
-  var feed = []
-  function render () {
-      fetch_posts().then(posts =>
-          document.getElementById('feed-post').innerHTML =
-              posts.map(p =>
-                  `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
+    <h2>Feed</h2>
+    <feed-post></feed-post>
+    <br>
+    <textarea id=subject placeholder=subject></textarea>
+    <textarea id=body placeholder=body></textarea>
+    <input type=button value='new post' onclick='make_new_post()' />
+
+    <script type=module>
+      import * as braid from 'braid-http'
+      import module from '@sillonious/module'
+
+      let feed = []
+      const $ = module('feed-post', { posts: [] })
+
+      $.draw(render)
+
+  function render (target) {
+      fetch_posts()
+      const { posts } = $.learn()
+      return posts.map(p =>
+          `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
 <b>${p.subject || ''}</b><br>
 ${p.body}</p>`
-              ).join('\n'))
+      ).join('\n')
   }
 
   var update_feed = (update) => {
@@ -91,7 +112,7 @@ ${p.body}</p>`
       else
           return undefined
   }
-  
+
   async function fetch_posts () {
       var result = []
       for (var i=0; i<feed.length; i++) {
@@ -100,6 +121,7 @@ ${p.body}</p>`
               result.push({url: feed[i].link, ...JSON.parse(post)})
       }
 
+      $.teach({ posts: result })
       return result
   }
 
@@ -120,4 +142,6 @@ ${p.body}</p>`
 
   window.make_new_post = make_new_post
 
-</script>
+    </script>
+  </body>
+</html>
