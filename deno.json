@@ -1,0 +1,19 @@
+{
+  "name": "@braid-org/braidmail",
+  "version": "0.1.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "start": "deno run -A --unstable mod.js",
+
+    "start-client": "deno run -A deno.js",
+    "debug-client": "deno run -A --inspect-brk deno.js",
+
+    "start-server": "node demo.js"
+
+  },
+  "imports": {
+    "pup": "https://deno.land/x/pup/mod.ts"
+  },
+  "compilerOptions": {
+  }
+}

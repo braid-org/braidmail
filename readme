@@ -7,3 +7,16 @@ A server for a feed of braided posts.  Like email, or a forum, over braid.
  - Each new /post/* will automatically append to the /feed
 
 See demo.js for an example of how to use.
+
+## run the full peer
+
+install node (https://github.com/nvm-sh/nvm)
+install deno (https://docs.deno.com/runtime/manual/getting_started/installation)
+
+```
+deno task start
+```
+
+run braidmail server (node) `deno task start-server`
+run braidmail client (deno) `deno task start-client`
+debug braidmail client (deno) `deno task debug-client`
