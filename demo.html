@@ -31,7 +31,8 @@
       import * as braid from 'braid-http'
       import module from '@sillonious/module'
 
-      const $ = module('feed-post', { posts: [], feed: [] })
+      let feed = []
+      const $ = module('feed-post', { posts: [] })
 
       $.draw(render)
 
@@ -50,24 +51,16 @@ ${p.body}</p>`
 
       if (update.body)
           // Got a whole new snapshot
-          $.teach({ feed: JSON.parse(update.body) })
+          feed = JSON.parse(update.body)
       else
           // Got patches to append to the feed
           update.patches.forEach(p => {
               console.assert(p.unit === 'json')
               console.assert(p.range === '[-0:-0]')
-              $.teach(JSON.parse(p.content), (state,payload) => {
-                return {
-                  ...state,
-                  feed: [
-                    ...state.feed,
-                    payload
-                  ]
-                }
-              })
+              feed.push(JSON.parse(p.content))
           })
 
-      console.log('Now feed is', $.learn().feed)
+      console.log('Now feed is', feed)
 
       render()
   }
@@ -121,7 +114,6 @@ ${p.body}</p>`
   }
 
   async function fetch_posts () {
-    const { feed } = $.learn()
       var result = []
       for (var i=0; i<feed.length; i++) {
           var post = await fetch_post(feed[i].link)

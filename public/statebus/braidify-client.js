@@ -137,6 +137,7 @@ if (is_nodejs) {
 	AbortController = window.AbortController
 	Headers = window.Headers
 	window.fetch = braid_fetch
+	window.braid_fetch = braid_fetch
 }
 
 
