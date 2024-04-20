@@ -21,8 +21,7 @@
     You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
 
     <h2>Feed</h2>
-    <pre id=feed-pre></pre>
-    <div id=feed-post></div>
+    <feed-post></feed-post>
     <br>
     <textarea id=subject placeholder=subject></textarea>
     <textarea id=body placeholder=body></textarea>
@@ -32,15 +31,18 @@
       import * as braid from 'braid-http'
       import module from '@sillonious/module'
 
-  var feed = []
-  function render () {
-      fetch_posts().then(posts =>
-          document.getElementById('feed-post').innerHTML =
-              posts.map(p =>
-                  `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
+      const $ = module('feed-post', { posts: [], feed: [] })
+
+      $.draw(render)
+
+  function render (target) {
+      fetch_posts()
+      const { posts } = $.learn()
+      return posts.map(p =>
+          `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
 <b>${p.subject || ''}</b><br>
 ${p.body}</p>`
-              ).join('\n'))
+      ).join('\n')
   }
 
   var update_feed = (update) => {
@@ -48,16 +50,24 @@ ${p.body}</p>`
 
       if (update.body)
           // Got a whole new snapshot
-          feed = JSON.parse(update.body)
+          $.teach({ feed: JSON.parse(update.body) })
       else
           // Got patches to append to the feed
           update.patches.forEach(p => {
               console.assert(p.unit === 'json')
               console.assert(p.range === '[-0:-0]')
-              feed.push(JSON.parse(p.content))
+              $.teach(JSON.parse(p.content), (state,payload) => {
+                return {
+                  ...state,
+                  feed: [
+                    ...state.feed,
+                    payload
+                  ]
+                }
+              })
           })
 
-      console.log('Now feed is', feed)
+      console.log('Now feed is', $.learn().feed)
 
       render()
   }
@@ -111,6 +121,7 @@ ${p.body}</p>`
   }
 
   async function fetch_posts () {
+    const { feed } = $.learn()
       var result = []
       for (var i=0; i<feed.length; i++) {
           var post = await fetch_post(feed[i].link)
@@ -118,6 +129,7 @@ ${p.body}</p>`
               result.push({url: feed[i].link, ...JSON.parse(post)})
       }
 
+      $.teach({ posts: result })
       return result
   }
 
