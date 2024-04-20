@@ -1,6 +1,8 @@
 var fs = require('fs'),
-    app = require('express')(),
+    express = require('express'),
     braidmail = require('./index.js')
+
+var app = express()
 
 app.use(free_the_cors)
 
@@ -8,6 +10,7 @@ app.use(free_the_cors)
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
 app.get('/', sendfile('demo.html'))
 
+app.use('/public', express.static('public'))
 app.use(braidmail)
 
 // Spin up the server
