@@ -1,5 +1,9 @@
 # Braidmail
 
-A server for braided posts.  Like email, or a forum, over braid.
+A server for a feed of braided posts.  Like email, or a forum, over braid.
+
+ - You can braid-subscribe to the /feed or each /post/*
+ - You can add, modify, or delete a /post/*
+ - Each new /post/* will automatically append to the /feed
 
 See demo.js for an example of how to use.
