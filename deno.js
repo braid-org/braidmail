@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'npm:express'
 import braidmail from './index.js'
 
 var app = express()
