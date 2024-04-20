@@ -1,0 +1,12 @@
+{
+  "name": "braidmail",
+  "version": "0.1.0",
+  "repository": "braid-org/braidmail",
+  "dependencies": {
+    "braid-http": "^0.3.3",
+    "express": "^4.19.2"
+  },
+  "files": [
+    "index.js"
+  ]
+}
