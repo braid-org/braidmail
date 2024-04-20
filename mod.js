@@ -1,4 +1,4 @@
-import { Pup } from "https://deno.land/x/pup/mod.ts"
+import { Pup } from "pup"
 
 const processConfiguration = {
   client: true,
