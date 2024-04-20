@@ -19,9 +19,9 @@ You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
       fetch_posts().then(posts =>
           document.getElementById('feed-post').innerHTML =
               posts.map(p =>
-                  `<p><div><code style='font-size:10'>${p.url}</code></div>
-<div><b>${p.subject || ''}</b></div>
-<div>${p.body}</div>`
+                  `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
+<b>${p.subject || ''}</b><br>
+${p.body}</p>`
               ).join('\n'))
   }
 

@@ -1,6 +1,6 @@
 var fs = require('fs'),
     app = require('express')(),
-    braidmail = require('./braidmail.js')
+    braidmail = require('./index.js')
 
 app.use(free_the_cors)
 

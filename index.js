@@ -29,9 +29,9 @@ var rhash = (req) => JSON.stringify([req.headers.client, req.url])
 
 
 // The main Braidmail request handler!
-function handler (req, res, next, options = {}) {
-    var feed_name = '/feed' || options.feed_name,
-        post_name = '/post/' || options.post_name
+function handler (req, res, next) {
+    var feed_name = '/feed'
+        post_name = '/post/'
 
     require('braid-http').http_server(req, res)
 
@@ -113,7 +113,7 @@ function getter (req, res) {
 
     // Send the current version
     res.sendUpdate({
-        version: curr_version(),
+        version: req.url === '/feed' ? curr_version() : undefined,
         body: JSON.stringify(resources[req.url])
     })
 
