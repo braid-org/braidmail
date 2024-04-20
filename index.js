@@ -16,11 +16,6 @@ It was really tasty.`},
 var curr_version = () => [ (resources['/feed'].length + '') ]
 
 
-function add_client_id (req) {
-    req.headers.client ??= Math.random().toString(36).substr(3)
-}
-
-
 // Load real data from db
 try {
     var resources = JSON.parse(fs.readFileSync('db'))
@@ -33,46 +28,15 @@ var subscriptions = {}
 var rhash = (req) => JSON.stringify([req.headers.client, req.url])
 
 
-// HTTP Routes
-function getter (req, res) {
-    // Make sure URL is valid
-    if (!(req.url in resources)) {
-        res.statusCode = 404
-        res.end()
-        return
-    }
-
-    // Set headers
-    res.setHeader('content-type', 'application/json')
-    if (req.url === '/feed') {
-        res.setHeader('Version-Type', 'appending-array')
-    }        
-
-    // Honor any subscription request
-    if (req.subscribe) {
-        console.log('Incoming subscription!!!')
-        res.startSubscription({ onClose: _=> delete subscriptions[rhash(req)] })
-        subscriptions[rhash(req)] = res
-        console.log('Now there are', Object.keys(subscriptions).length, 'subscriptions')
-    } else
-        res.statusCode = 200
-
-    // Send the current version
-    res.sendUpdate({
-        version: curr_version(),
-        body: JSON.stringify(resources[req.url])
-    })
-
-    if (!req.subscribe)
-        res.end()
-}
-
+// The main Braidmail request handler!
 function handler (req, res, next, options = {}) {
     var feed_name = '/feed' || options.feed_name,
         post_name = '/post/' || options.post_name
 
     require('braid-http').http_server(req, res)
-    add_client_id(req)
+
+    // We'll give each request a random ID, if it's not alraedy provided to us
+    req.headers.peer ??= Math.random().toString(36).substr(3)
 
     // Feed only supports get
     if (req.url === feed_name && req.method === 'GET') {
@@ -121,6 +85,43 @@ function handler (req, res, next, options = {}) {
     }
 }
 
+// GET the /feed or a /post/
+//   - handles subscriptions
+//   - and regular GETs
+function getter (req, res) {
+    // Make sure URL is valid
+    if (!(req.url in resources)) {
+        res.statusCode = 404
+        res.end()
+        return
+    }
+
+    // Set headers
+    res.setHeader('content-type', 'application/json')
+    if (req.url === '/feed') {
+        res.setHeader('Version-Type', 'appending-array')
+    }
+
+    // Honor any subscription request
+    if (req.subscribe) {
+        console.log('Incoming subscription!!!')
+        res.startSubscription({ onClose: _=> delete subscriptions[rhash(req)] })
+        subscriptions[rhash(req)] = res
+        console.log('Now there are', Object.keys(subscriptions).length, 'subscriptions')
+    } else
+        res.statusCode = 200
+
+    // Send the current version
+    res.sendUpdate({
+        version: curr_version(),
+        body: JSON.stringify(resources[req.url])
+    })
+
+    if (!req.subscribe)
+        res.end()
+}
+
+
 // Add a post to the feed.  Update all subscribers.
 function append_to_feed (post_req) {
     var post_entry = {link: post_req.url}
@@ -133,9 +134,9 @@ function append_to_feed (post_req) {
 
     // Tell everyone about it
     for (var k in subscriptions) {
-        var [client, url] = JSON.parse(k)
-        if (client !== post_req.headers.client && url === '/feed') {
-            console.log('Telling client', client, 'about the new', post_entry, 'in /feed')
+        var [peer, url] = JSON.parse(k)
+        if (peer !== post_req.headers.peer && url === '/feed') {
+            console.log('Telling peer', peer, 'about the new', post_entry, 'in /feed')
             subscriptions[k].sendUpdate({
                 version: curr_version(),
                 patches: [{
@@ -155,9 +156,9 @@ function post_changed (req) {
 
     // Tell everyone
     for (var k in subscriptions) {
-        var [client, url] = JSON.parse(k)
-        if (client !== req.headers.client && url === req.url) {
-            console.log('Yes! Telling', {client, url})
+        var [peer, url] = JSON.parse(k)
+        if (peer !== req.headers.peer && url === req.url) {
+            console.log('Yes! Telling peer', {peer, url})
             subscriptions[k].sendUpdate({
                 version: curr_version(),
                 body: JSON.stringify(resources[req.url])
