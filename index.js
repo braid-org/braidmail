@@ -98,9 +98,8 @@ function getter (req, res) {
 
     // Set headers
     res.setHeader('content-type', 'application/json')
-    if (req.url === '/feed') {
+    if (req.url === '/feed')
         res.setHeader('Version-Type', 'appending-array')
-    }
 
     // Honor any subscription request
     if (req.subscribe) {
