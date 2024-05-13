@@ -8,16 +8,28 @@ actual_post_width = post_width + 13 * 2
 dom.BODY = ->
   DIV {},
     H1 'Braidmail'
-    'You can also view the raw ', A(href: "/feed", '/feed'), '.'
+    'You can also view the raw ', A(href: "/feed", '/feed'), '. '
+    'Spec is ', A(href: 'https://braid.org/apps/braidmail/spec2', 'here'), '.'
     DIV height: 20
     NEW_POST()
     FEED()
   
 FEED = ->
+  threads = make_threads()
+  DRAW_THREADS(threads)
+
+DRAW_THREADS = (threads) ->
   DIV {},
-    for post in state.feed
-      POST post
-      
+    for post in threads
+      [
+        POST post
+        if post.children.length > 0
+          DIV marginLeft: 10, DRAW_THREADS(post.children)
+      ]
+
+  #  - Final "virtual" post creates reply box
+
+
 dom.NEW_POST = ->
   DIV {},
     # TEXTAREA id: 'subject', placeholder: 'subject'
@@ -52,6 +64,7 @@ dom.NEW_POST = ->
 
 POST = (post) ->
   body = post.body.split('\n')
+
   DIV
     marginBottom: 2
     IMG
@@ -70,6 +83,8 @@ POST = (post) ->
       for p in body.slice(1)
         DIV p
 
+      # DIV post.bump_date and new Date(post.bump_date).toLocaleString()
+
       # Little url link
       CODE
         position: 'absolute'
@@ -78,9 +93,59 @@ POST = (post) ->
         fontSize: 5
         A(href: post.url, color: '#aaa', textDecoration: 'none', post.url)
 
-threads = ->
-  state.feed.slice().reverse()
+make_threads = () ->
+  # Create Threads:
+  #
+  #  - Make hash of threads
+  threads = {}
 
+  if not state.feed or state.feed.length == 0
+    return []
+
+  #  - Populate with all posts, first
+  #    - with empty children hash
+  #    - and thread-bump-date
+  for post in state.feed
+    threads[post.url] = Object.assign({}, post)
+    threads[post.url].children = {}
+    threads[post.url].bump_date = post.date or 631209355000
+
+  # console.log('Initialized threads are', threads)
+  
+  #  - Then for each, look up its reply-to
+  #    - If exists, delete and move it to that post's children
+  #      - Update thread_bump_time up to root
+  bump_thread = (post) ->
+    bump_date = post.date
+    while threads[post['in-reply-to']]
+      post.bump_date = bump_date
+      post = threads[post['in-reply-to']]
+
+  for post of threads
+    parent = post['in-reply-to']
+    if parent and threads[parent]
+      delete threads[post.url]
+      threads[parent].children[post.url] = post
+      bump_thread(post)
+
+  # console.log('Populated & bumped threads are', threads)
+
+  # Traverse Threads:
+  #
+  #  - Grab all posts, and sort by thread-bump-date
+  #  - Iterate, and recurse
+  listify = (threads) ->
+    listed = Object.values(threads)
+    listed.sort((a, b) -> b.bump_date - a.bump_date)
+    for thread in listed
+      thread.children = listify(thread.children)
+    return listed
+
+  # Return the listed threads
+  result = listify(threads)
+
+  # console.log('Listed threads are', result)
+  return result
 
 ## An auto-resizing <textarea>
 dom.AUTOSIZEBOX = ->
@@ -129,8 +194,11 @@ client.subscribe_to_feed('/feed', feed => state.feed = feed)
 // Make new post
 window.make_new_post = () => {
   client.make_new_post('', {
+    to: ['public'],
+    from: ['mike@braid.org'],
     subject: document.getElementById('subject')?.value,
-    body: document.getElementById('body').value
+    body: document.getElementById('body').value,
+    date: new Date().getTime()
   })
 
   // Now clear the form

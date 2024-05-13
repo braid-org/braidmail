@@ -104,21 +104,19 @@ function fetch_posts (feed, cb) {
     }
 }
 
-function make_new_post (host, {subject, body}) {
+function make_new_post (host, {subject, body = '', date, from, to, cc}) {
     // Generate a random ID
     var id = Math.random().toString(36).substr(6)
+
+    date ??= new Date().getTime()
+    from ??= ['anonymous']
+    to   ??= ['public']
+    cc   ??= []
 
     // Post it to the server
     braid.fetch(host + '/post/' + id, {
         method: 'PUT',
-        body: JSON.stringify({
-            to:       ["rjaycarpenter@gmail.com","email@tychi.me"],
-            cc:       ["toomim@gmail.com"],
-            from:     ["email@tychi.me"],
-            date:     Date.now(),
-            subject:  subject,
-            body:     body
-        })
+        body: JSON.stringify({ from, to, cc, date, subject, body })
     })
 }
 

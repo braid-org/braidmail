@@ -8,11 +8,19 @@ var resources = {
         {link: '/post/2'},
         {link: '/post/3'}
     ],
-    '/post/1': {subject: 'First!', body: 'First post OMGGG!!!!'},
-    '/post/2': {subject: 'Second...', body: `Once upon a time,
+    '/post/1': {subject: 'First!',
+                body: 'First post OMGGG!!!!',
+                date: 1715618080011},
+
+    '/post/2': {subject: 'Second...',
+                body: `Once upon a time,
 I ate a big fish.
-It was really tasty.`},
-    '/post/3': {subject: 'Tois.', body: "It's nice when things come in threes."},
+It was really tasty.`,
+                date: 1715618080012},
+
+    '/post/3': {subject: 'Tois.',
+                body: "It's nice when things come in threes.",
+                date: 1715618080013},
 
     '/users': {
         'mike@braid.org': {
