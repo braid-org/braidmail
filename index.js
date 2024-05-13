@@ -117,24 +117,28 @@ function getter (req, res) {
     } else
         res.statusCode = 200
 
-    if (req.parents && req.url === '/feed') {
-        // Feed resubscribers get a shortcut update
-        var feed = resources[req.url]
 
-        assert(req.parents.length === 1
-               && typeof parseInt(req.parents[0]) === 'number'
-               && parseInt(req.parents[0]) > 0
-               && parseInt(req.parents[0]) <= feed.length)
+    // Feed resubscribers get a shortcut update
+    if (req.parents && req.url === '/feed'
+        // If they have to have a valid parents header
+        && req.parents.length === 1
+        && typeof parseInt(req.parents[0]) === 'number'
+        && parseInt(req.parents[0]) > 0
+        && parseInt(req.parents[0]) <= resources[req.url].length) {
 
-        // Skip the update entirely if we're already at the current version
-        if (JSON.stringify(curr_version()) !== JSON.stringify(req.parents))
+        if (JSON.stringify(curr_version()) === JSON.stringify(req.parents)) {
+            // Skip the update entirely if we're already at the current version
+        } else
+            // Send a slice of the recent feed
             res.sendUpdate({
                 version: curr_version(),
                 parents: req.parents,
                 patches: [{
                     unit:'json',
                     range: '[-0:-0]',
-                    content: JSON.stringify(feed.slice(parseInt(req.parents[0])))
+                    content: JSON.stringify(
+                        resources[req.url].slice(parseInt(req.parents[0]))
+                    )
                 }]
             })
     }

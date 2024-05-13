@@ -29,7 +29,6 @@ require('http')
 
 // Free the CORS!
 function free_the_cors (req, res, next) {
-    console.log('free the cors!', req.method, req.url)
     res.setHeader('Range-Request-Allow-Methods', 'PATCH, PUT')
     res.setHeader('Range-Request-Allow-Units', 'json')
     res.setHeader("Patches", "OK")

@@ -38,10 +38,13 @@ async function subscribe_to_feed (url, cb) {
     function patch_feed (update) {
         console.log('We got a new update!', update)
 
-        if (update.body)
+        if (update.body) {
             // Got a whole new snapshot
             feed = JSON.parse(update.body)
-        else
+            // Reset everything from scratch
+            posts = {}
+            curr_version = undefined
+        } else
             // Got patches to append to the feed
             update.patches.forEach(p => {
                 console.assert(p.unit === 'json')
