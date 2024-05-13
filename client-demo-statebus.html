@@ -63,6 +63,7 @@ dom.NEW_POST = ->
         type: 'button'
         value: 'Post'
         onClick: -> make_new_post()
+        disabled: (state.new_post or '').length == 0
 
 POST = (post) ->
   body = post.body.split('\n')
