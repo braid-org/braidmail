@@ -50,9 +50,9 @@ net.subscribe_to_feed('/feed', (feed) => {
 
 // Make new post
 window.make_new_post = () => {
-  net.make_new_post({
+  net.make_new_post('', {
     subject: document.getElementById('subject').value,
-     body: document.getElementById('body').value
+    body: document.getElementById('body').value
   })
 
   // Now clear the form

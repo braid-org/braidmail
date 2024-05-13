@@ -32,7 +32,7 @@ ${post.body}</p>`
 
   // Make new post
   function make_new_post () {
-      net.make_new_post({
+      net.make_new_post('', {
           subject: document.getElementById('subject').value,
           body: document.getElementById('body').value
       })
