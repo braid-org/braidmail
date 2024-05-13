@@ -25,7 +25,7 @@ function save_db () { fs.writeFileSync('db', JSON.stringify(resources, null, 2))
 
 // Subscriptions
 var subscriptions = {}
-var rhash = (req) => JSON.stringify([req.headers.client, req.url])
+var rhash = (req) => JSON.stringify([req.headers.peer, req.url])
 
 
 // The main Braidmail request handler!
@@ -135,6 +135,9 @@ function append_to_feed (post_req) {
     // Save the new database
     save_db()
 
+    // console.log('Updating /feed listners from',
+    //             {subscriptions: Object.keys(subscriptions)})
+
     // Tell everyone about it
     for (var k in subscriptions) {
         var [peer, url] = JSON.parse(k)
@@ -161,7 +164,7 @@ function post_changed (req) {
     for (var k in subscriptions) {
         var [peer, url] = JSON.parse(k)
         if (peer !== req.headers.peer && url === req.url) {
-            console.log('Yes! Telling peer', {peer, url})
+            console.log('Telling peer', peer, 'about new post', url)
             subscriptions[k].sendUpdate({
                 version: curr_version(),
                 body: JSON.stringify(resources[req.url])

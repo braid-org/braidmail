@@ -1,7 +1,10 @@
 import * as braid from 'https://esm.sh/braid-http'
   
-var feed = []
-var posts = {}
+var feed = [],
+    posts = {},
+    curr_version,
+    peer = Math.random().toString(36).substr(3)
+
 
 async function subscribe_to_feed (url, cb) {
 
@@ -9,7 +12,7 @@ async function subscribe_to_feed (url, cb) {
 
     // Do the initial fetch
     try {
-        var res = await braid.fetch(url, {subscribe: true})
+        var res = await braid.fetch(url, {subscribe: true, parents: curr_version, peer})
     }
     catch (e) { retry() }
 

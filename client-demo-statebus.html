@@ -14,10 +14,11 @@ FEED = ->
   console.log('rendering feed', state.feed)
   DIV {},
     for post in state.feed
-      DIV marginBottom: 10,
-        DIV A(href: post.url, CODE({style: fontSize: 10}, post.url))
-        DIV B post.subject
-        DIV post.body
+      DIV marginBottom: 5,
+        SPAN width: 70, display: 'inline-block',
+          A(href: post.url, CODE({style: fontSize: 8}, post.url))
+        SPAN paddingRight: 10, B post.subject
+        SPAN post.body
       
 NEW_POST = ->
   DIV {},
