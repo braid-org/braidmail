@@ -3,12 +3,12 @@ state.feed = []
 
 dom.BODY = ->
   DIV {},
-    H1 'Braidmail!'
+
+    H1 'Braidmail'
     'You can view the raw ', A(href: "/feed", '/feed'), ' or play with the UI below.'
     H2 'Feed'
-    FEED()
-
     NEW_POST()
+    FEED()
   
 FEED = ->
   DIV {},
@@ -17,13 +17,17 @@ FEED = ->
         SPAN width: 70, display: 'inline-block',
           A(href: post.url, CODE({style: fontSize: 8}, post.url))
         SPAN paddingRight: 10, B post.subject
-        SPAN post.body
+        SPAN for p in post.body.split('\n') then [p, BR()]
       
 NEW_POST = ->
   DIV {},
     TEXTAREA id: 'subject', placeholder: 'subject'
     TEXTAREA id: 'body', placeholder: 'body'
     INPUT type: 'button', value: 'new post', onClick: -> make_new_post()
+
+threads = ->
+  state.feed.slice().reverse()
+
 </script>
 
 <!-- Include Statebus & Libs -->
@@ -41,13 +45,13 @@ bus.libs.react12.coffreact()
 
 
 // Load feed from the network
-import * as net from '/net-client.js'
+import * as client from '/feed-client.js'
 
-net.subscribe_to_feed('/feed', feed => state.feed = feed)
+client.subscribe_to_feed('/feed', feed => state.feed = feed)
 
 // Make new post
 window.make_new_post = () => {
-  net.make_new_post('', {
+  client.make_new_post('', {
     subject: document.getElementById('subject').value,
     body: document.getElementById('body').value
   })
@@ -58,3 +62,8 @@ window.make_new_post = () => {
 }
 
 </script>
+<style>
+body, p, input, textarea {
+  font-family: avenext, avenir, avenir next, sans;
+}
+</style>

@@ -12,10 +12,10 @@ You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
   
 
 <script type=module>
-  import * as net from '/net-client.js'
+  import * as client from '/feed-client.js'
   var feed = []
 
-  net.subscribe_to_feed('/feed', new_feed => { feed = new_feed; render() })
+  client.subscribe_to_feed('/feed', new_feed => { feed = new_feed; render() })
 
   function render () {
       document.getElementById('feed-post').innerHTML =
@@ -28,7 +28,7 @@ ${post.body}</p>`
 
   // Make new post
   function make_new_post () {
-      net.make_new_post('', {
+      client.make_new_post('', {
           subject: document.getElementById('subject').value,
           body: document.getElementById('body').value
       })
