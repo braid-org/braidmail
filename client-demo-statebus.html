@@ -11,6 +11,7 @@ dom.BODY = ->
     'You can also view the raw ', A(href: "/feed", '/feed'), '. '
     'Spec is ', A(href: 'https://braid.org/apps/braidmail/spec2', 'here'), '. '
     'Library to sync with a feed is ', A(href: '/feed-client.js', 'here'), '. '
+    'Github ', A(href: 'https://github.com/braid-org/braidmail', 'here'), '. '
     DIV height: 20
     NEW_POST()
     FEED()
@@ -50,11 +51,10 @@ dom.NEW_POST = ->
       # backgroundColor: '#eee'
       value: state.new_post
       onChange: (e) -> state.new_post = e.target.value
-      onKeyDown: (e) ->
-        if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
-          e.preventDefault()
-          e.stopPropagation()
-          make_new_post()
+      onKeyDown: (e) -> if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
+                           e.preventDefault()
+                           e.stopPropagation()
+                           make_new_post()
     DIV
       width: actual_post_width + icon_size
       height: 40

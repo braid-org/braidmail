@@ -6,4 +6,4 @@ A server for a feed of braided posts.  Like email, or a forum, over braid.
  - You can add, modify, or delete a /post/*
  - Each new /post/* will automatically append to the /feed
 
-See demo.js for an example of how to use.
+See server-demo.js for an example of how to use.
