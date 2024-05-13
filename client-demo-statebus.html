@@ -11,7 +11,6 @@ dom.BODY = ->
     NEW_POST()
   
 FEED = ->
-  console.log('rendering feed', state.feed)
   DIV {},
     for post in state.feed
       DIV marginBottom: 5,
@@ -44,10 +43,7 @@ bus.libs.react12.coffreact()
 // Load feed from the network
 import * as net from '/net-client.js'
 
-net.subscribe_to_feed('/feed', (feed) => {
-  console.log('big guy got the feed', feed)
-  state.feed = feed
-})
+net.subscribe_to_feed('/feed', feed => state.feed = feed)
 
 // Make new post
 window.make_new_post = () => {

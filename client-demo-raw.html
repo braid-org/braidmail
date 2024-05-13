@@ -15,11 +15,7 @@ You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
   import * as net from '/net-client.js'
   var feed = []
 
-  net.subscribe_to_feed('/feed', new_feed => {
-      console.log('ui got the feed', new_feed)
-      feed = new_feed
-      render()
-  })
+  net.subscribe_to_feed('/feed', new_feed => { feed = new_feed; render() })
 
   function render () {
       document.getElementById('feed-post').innerHTML =

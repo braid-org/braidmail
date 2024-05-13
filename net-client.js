@@ -1,4 +1,4 @@
-import * as braid from 'https://esm.sh/braid-http'
+import * as braid from 'https://esm.sh/braid-http?dev'
   
 var feed = [],
     posts = {},
@@ -13,27 +13,27 @@ async function subscribe_to_feed (url, cb) {
     // Do the initial fetch
     try {
         var res = await braid.fetch(url, {subscribe: true, parents: curr_version, peer})
+
+        console.log('Got res! subscribe is', res.headers.get('subscribe'))
+
+        // Server might support subscriptions
+        if (res.headers.has('subscribe'))
+            res.subscribe(patch_feed, retry)
+
+        // Else just do polling
+        else {
+            // Incorporate this update we got
+            patch_feed({
+                version: res.version,
+                body: await res.text()
+            })
+
+            // And poll again
+            console.log('Polling!  Waiting 30 seconds...')
+            setTimeout(retry, 30 * 1000)
+        }
     }
     catch (e) { retry() }
-
-    console.log('Got res! subscribe is', res.headers.get('subscribe'))
-
-    // Server might support subscriptions
-    if (res.headers.has('subscribe'))
-        res.subscribe(patch_feed, retry)
-
-    // Else just do polling
-    else {
-        // Incorporate this update we got
-        patch_feed({
-            version: res.version,
-            body: await res.text()
-        })
-
-        // And poll again
-        console.log('Polling!  Waiting 30 seconds...')
-        setTimeout(retry, 30 * 1000)
-    }
 
     function patch_feed (update) {
         console.log('We got a new update!', update)
@@ -46,10 +46,11 @@ async function subscribe_to_feed (url, cb) {
             update.patches.forEach(p => {
                 console.assert(p.unit === 'json')
                 console.assert(p.range === '[-0:-0]')
-                feed.push(JSON.parse(p.content))
+                feed = feed.concat(JSON.parse(p.content))
             })
 
-        console.log('Now feed is', feed)
+        // Update the current version
+        curr_version = update.version
 
         // Fetch the post and announce!
         fetch_posts(feed, cb)
@@ -67,15 +68,11 @@ async function fetch_post (url) {
 }
   
 function fetch_posts (feed, cb) {
-    console.log('fetching posts for', feed)
-
     // Initialize posts hash
     for (var i=0; i<feed.length; i++) {
         var link = feed[i].link
-        if (!(link in posts)) {
-            console.log('initializing post', link)
+        if (!(link in posts))
             posts[link] = undefined
-        }
     }
 
     // Fetch all missing posts
@@ -90,7 +87,6 @@ function fetch_posts (feed, cb) {
                 }
                 posts[link] = post
                 var new_feed = compile_posts()
-                console.log('Announcing posts:', new_feed)
                 cb(new_feed)
             })
 

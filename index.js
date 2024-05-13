@@ -1,4 +1,5 @@
-var fs = require('fs')
+var fs = require('fs'),
+    assert = require('assert')
 
 // Default data
 var resources = {
@@ -98,8 +99,10 @@ function getter (req, res) {
 
     // Set headers
     res.setHeader('content-type', 'application/json')
-    if (req.url === '/feed')
-        res.setHeader('Version-Type', 'appending-array')
+    if (req.url === '/feed') {
+        res.setHeader('Version-Type', 'arraystream')
+        res.setHeader('Current-Version', curr_version().map(JSON.stringify).join(', '))
+    }
 
     // Honor any subscription request
     if (req.subscribe) {
@@ -114,11 +117,33 @@ function getter (req, res) {
     } else
         res.statusCode = 200
 
-    // Send the current version
-    res.sendUpdate({
-        version: req.url === '/feed' ? curr_version() : undefined,
-        body: JSON.stringify(resources[req.url])
-    })
+    if (req.parents && req.url === '/feed') {
+        // Feed resubscribers get a shortcut update
+        var feed = resources[req.url]
+
+        assert(req.parents.length === 1
+               && typeof parseInt(req.parents[0]) === 'number'
+               && parseInt(req.parents[0]) > 0
+               && parseInt(req.parents[0]) <= feed.length)
+
+        // Skip the update entirely if we're already at the current version
+        if (JSON.stringify(curr_version()) !== JSON.stringify(req.parents))
+            res.sendUpdate({
+                version: curr_version(),
+                parents: req.parents,
+                patches: [{
+                    unit:'json',
+                    range: '[-0:-0]',
+                    content: JSON.stringify(feed.slice(parseInt(req.parents[0])))
+                }]
+            })
+    }
+    else
+        // Send a snapshot of state to first-timers
+        res.sendUpdate({
+            version: req.url === '/feed' ? curr_version() : undefined,
+            body: JSON.stringify(resources[req.url])
+        })
 
     if (!req.subscribe)
         res.end()
@@ -148,7 +173,7 @@ function append_to_feed (post_req) {
                 patches: [{
                     unit: 'json',
                     range: '[-0:-0]',
-                    content: JSON.stringify(post_entry)
+                    content: JSON.stringify([post_entry])
                 }]
             })
         }
