@@ -104,7 +104,11 @@ function getter (req, res) {
     // Honor any subscription request
     if (req.subscribe) {
         console.log('Incoming subscription!!!')
-        res.startSubscription({ onClose: _=> delete subscriptions[rhash(req)] })
+        res.startSubscription({ onClose: _=> {
+            delete subscriptions[rhash(req)]
+            console.log('Disconnect! Now there are',
+                        Object.keys(subscriptions).length, 'subscriptions')
+        }})
         subscriptions[rhash(req)] = res
         console.log('Now there are', Object.keys(subscriptions).length, 'subscriptions')
     } else

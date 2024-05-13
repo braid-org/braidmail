@@ -71,7 +71,7 @@ ${p.body}</p>`
           //  - Get response with set of one or updates in body
 
           update_feed({
-              version: JSON.parse('[' + res.headers.get('version') + ']'),
+              version: res.version,
               body: await res.text()
           })
 
@@ -96,15 +96,24 @@ ${p.body}</p>`
       var result = []
       for (var i=0; i<feed.length; i++) {
           var post = await fetch_post(feed[i].link)
+          try {
+              post = JSON.parse(post)
+          } catch (e) {
+              console.error('Error parsing post', {link: feed[i].link, post})
+              continue
+          }
           if (post)
-              result.push({url: feed[i].link, ...JSON.parse(post)})
+              result.push({url: feed[i].link, ...post})
       }
 
       return result
   }
 
   function make_new_post () {
+      // Generate a random ID
       var id = Math.random().toString(36).substr(6)
+
+      // Post it to the server
       braid.fetch('/post/' + id, {
           method: 'PUT',
           body: JSON.stringify({
@@ -116,6 +125,10 @@ ${p.body}</p>`
               body:     document.getElementById('body').value
           })
       })
+
+      // Now clear the form
+      document.getElementById('subject').value = ''
+      document.getElementById('body').value = ''
   }
 
   window.make_new_post = make_new_post
