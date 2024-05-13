@@ -8,8 +8,9 @@ app.use(free_the_cors)
 
 // Host some simple HTML
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
-app.get('/',    sendfile('client-demo-statebus.html'))
-app.get('/raw', sendfile('client-demo-raw.html'))
+app.get('/',               sendfile('client-demo-statebus.html'))
+app.get('/raw',            sendfile('client-demo-raw.html'))
+app.get('/net-client.js',  sendfile('net-client.js'))
 
 // Serve users from Statebus
 app.all('/user*', bus.http_in)

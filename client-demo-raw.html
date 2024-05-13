@@ -12,118 +12,29 @@ You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
   
 
 <script type=module>
-  import * as braid from 'https://esm.sh/braid-http'
-  
+  import * as net from '/net-client.js'
   var feed = []
-  function render () {
-      fetch_posts().then(posts =>
-          document.getElementById('feed-post').innerHTML =
-              posts.map(p =>
-                  `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
-<b>${p.subject || ''}</b><br>
-${p.body}</p>`
-              ).join('\n'))
-  }
 
-  var update_feed = (update) => {
-      console.log('We got a new update!', update)
-
-      if (update.body)
-          // Got a whole new snapshot
-          feed = JSON.parse(update.body)
-      else
-          // Got patches to append to the feed
-          update.patches.forEach(p => {
-              console.assert(p.unit === 'json')
-              console.assert(p.range === '[-0:-0]')
-              feed.push(JSON.parse(p.content))
-          })
-
-      console.log('Now feed is', feed)
-
+  net.subscribe_to_feed('/feed', new_feed => {
+      console.log('ui got the feed', new_feed)
+      feed = new_feed
       render()
+  })
+
+  function render () {
+      document.getElementById('feed-post').innerHTML =
+          feed.map(post =>
+              `<p><a href='${post.url}'><code style='font-size:10'>${post.url}</code></a><br>
+<b>${post.subject || ''}</b><br>
+${post.body}</p>`
+          ).join('\n')
   }
 
-  async function fetch_feed () {
-      try {
-          var res = await braid.fetch('/feed', {subscribe: true})
-      } catch (e) {
-          console.log('try catch error! retrying...')
-          setTimeout(fetch_feed, 3000)
-      }
-
-      console.log('Got res! subscribe is', res.headers.get('subscribe'))
-
-      if (res.headers.has('subscribe'))
-          res.subscribe(update_feed, (e) => {
-              console.log('subscribe error!', e, 'retrying...')
-              setTimeout(fetch_feed, 3000)
-          })
-      else {
-          // Todo: add braid-http client library support to return array
-          // of updates, or iterate through sequence of updates, in the
-          // various forms that it can be encoded.
-          //
-          // Form 1:
-          //  - Normal GET response with headers and body as update
-          //
-          // Form 2:
-          //  - Get response with set of one or updates in body
-
-          update_feed({
-              version: res.version,
-              body: await res.text()
-          })
-
-          // Polling!
-          console.log('Polling!  Waiting 30 seconds...')
-          setTimeout(fetch_feed, 30000)
-      }
-  }
-
-  fetch_feed()
-
-  async function fetch_post (url) {
-      // Todo: subscribe to changes in posts
-      var res = await braid.fetch(url)
-      if (res.status === 200)
-          return await res.text()
-      else
-          return undefined
-  }
-  
-  async function fetch_posts () {
-      var result = []
-      for (var i=0; i<feed.length; i++) {
-          var post = await fetch_post(feed[i].link)
-          try {
-              post = JSON.parse(post)
-          } catch (e) {
-              console.error('Error parsing post', {link: feed[i].link, post})
-              continue
-          }
-          if (post)
-              result.push({url: feed[i].link, ...post})
-      }
-
-      return result
-  }
-
+  // Make new post
   function make_new_post () {
-      // Generate a random ID
-      var id = Math.random().toString(36).substr(6)
-
-      // Post it to the server
-      braid.fetch('/post/' + id, {
-          method: 'PUT',
-          body: JSON.stringify({
-              to:       ["rjaycarpenter@gmail.com","email@tychi.me"],
-              cc:       ["toomim@gmail.com"],
-              from:     ["email@tychi.me"],
-              date:     Date.now(),
-              subject:  document.getElementById('subject').value,
-              body:     document.getElementById('body').value
-          })
+      net.make_new_post({
+          subject: document.getElementById('subject').value,
+          body: document.getElementById('body').value
       })
 
       // Now clear the form
