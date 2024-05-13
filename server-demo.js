@@ -1,13 +1,24 @@
 var fs = require('fs'),
-    app = require('express')(),
-    braidmail = require('./index.js')
+    express = require('express')
+    app = express(),
+    braidmail = require('./index.js'),
+    bus = require('statebus')()
 
 app.use(free_the_cors)
 
 // Host some simple HTML
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
-app.get('/', sendfile('demo.html'))
+app.get('/',    sendfile('client-demo-statebus.html'))
+app.get('/raw', sendfile('client-demo-raw.html'))
 
+// Serve users from Statebus
+app.all('/user*', bus.http_in)
+app.all('/current_user/*', bus.http_in)
+
+// Serve js files
+app.use('/js/statebus', express.static('node_modules/statebus'))
+
+// Serve the braidmail state
 app.use(braidmail)
 
 // Spin up the server
