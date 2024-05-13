@@ -25,6 +25,7 @@ DRAW_THREADS = (threads) ->
         POST post
         if post.children.length > 0
           DIV marginLeft: 10, DRAW_THREADS(post.children)
+        DIV marginBottom: icon_size / 2
       ]
 
   #  - Final "virtual" post creates reply box
