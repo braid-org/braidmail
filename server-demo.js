@@ -1,8 +1,7 @@
 var fs = require('fs'),
     express = require('express')
     app = express(),
-    braidmail = require('./index.js'),
-    bus = require('statebus')()
+    braidmail = require('./index.js')
 
 app.use(free_the_cors)
 app.use((req, res, next) => {
@@ -15,13 +14,11 @@ sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
 app.get('/',               sendfile('client-demo-statebus.html'))
 app.get('/raw',            sendfile('client-demo-raw.html'))
 app.get('/feed-client.js', sendfile('feed-client.js'))
+app.use('/js/statebus',    express.static('node_modules/statebus'))
 
 // // Serve users from Statebus
 // app.all('/user*', bus.http_in)
 // app.all('/current_user/*', bus.http_in)
-
-// Serve js files
-app.use('/js/statebus', express.static('node_modules/statebus'))
 
 // Serve the braidmail state
 app.use(braidmail)
