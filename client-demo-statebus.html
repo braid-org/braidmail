@@ -51,7 +51,7 @@ dom.NEW_POST = ->
       value: state.new_post
       onChange: (e) -> state.new_post = e.target.value
       onKeyDown: (e) ->
-        if (e.keyCode == 13 and (e.ctrlKey or e.shiftKey or e.metaKey))
+        if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
           e.preventDefault()
           e.stopPropagation()
           make_new_post()
