@@ -18,6 +18,7 @@ dom.BODY = ->
   
 FEED = ->
   threads = make_threads()
+  window.threads = threads
   DRAW_THREADS(threads)
 
 DRAW_THREADS = (threads) ->
@@ -26,8 +27,8 @@ DRAW_THREADS = (threads) ->
       [
         POST post
         if post.children.length > 0
-          DIV marginLeft: 10, DRAW_THREADS(post.children)
-        DIV marginBottom: icon_size / 2
+          DIV marginLeft: icon_size, DRAW_THREADS(post.children)
+        DIV marginBottom: icon_size
       ]
 
   #  - Final "virtual" post creates reply box
@@ -124,9 +125,10 @@ make_threads = () ->
       post.bump_date = bump_date
       post = threads[post['in-reply-to']]
 
-  for post of threads
+  for url, post of threads
     parent = post['in-reply-to']
     if parent and threads[parent]
+      console.log('adding post', post, 'to parent', parent)
       delete threads[post.url]
       threads[parent].children[post.url] = post
       bump_thread(post)
