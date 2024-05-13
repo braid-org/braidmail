@@ -12,7 +12,15 @@ var resources = {
     '/post/2': {subject: 'Second...', body: `Once upon a time,
 I ate a big fish.
 It was really tasty.`},
-    '/post/3': {subject: 'Tois.', body: "It's nice when things come in threes."}
+    '/post/3': {subject: 'Tois.', body: "It's nice when things come in threes."},
+
+    '/users': {
+        'mike@braid.org': {
+            name: 'Michael Toomim',
+            email: 'mike@braid.org',
+            pic: 'https://invisible.college/toomim/toom-headup.jpg'
+        }
+    }
 }
 var curr_version = () => [ (resources['/feed'].length + '') ]
 
@@ -31,20 +39,26 @@ var rhash = (req) => JSON.stringify([req.headers.peer, req.url])
 
 // The main Braidmail request handler!
 function handler (req, res, next) {
-    var feed_name = '/feed'
-        post_name = '/post/'
+    var feed_name = '/feed',
+        post_name = '/post/',
+        users_name = '/users'
 
     require('braid-http').http_server(req, res)
 
     // We'll give each request a random ID, if it's not alraedy provided to us
     req.headers.peer ??= Math.random().toString(36).substr(3)
 
-    // Feed only supports get
-    if (req.url === feed_name && req.method === 'GET') {
-        getter(req, res)
-    }
+    // console.log('req:', {
+    //     url: req.url,
+    //     post: req.url.startsWith(post_name),
+    //     users: req.url === users_name
+    // })
 
-    else if (req.url.startsWith(post_name)) {
+    // Feed only supports get
+    if (req.url === feed_name && req.method === 'GET')
+        getter(req, res)
+
+    else if (req.url.startsWith(post_name) || req.url === users_name) {
 
         // GET /post/*
         if (req.method === 'GET')
@@ -106,7 +120,7 @@ function getter (req, res) {
 
     // Honor any subscription request
     if (req.subscribe) {
-        console.log('Incoming subscription!!!')
+        console.log('Incoming subscription!!!', req.url)
         res.startSubscription({ onClose: _=> {
             delete subscriptions[rhash(req)]
             console.log('Disconnect! Now there are',

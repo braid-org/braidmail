@@ -5,16 +5,20 @@ var fs = require('fs'),
     bus = require('statebus')()
 
 app.use(free_the_cors)
+app.use((req, res, next) => {
+    console.log(req.method, req.url)
+    next()
+})
 
 // Host some simple HTML
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
 app.get('/',               sendfile('client-demo-statebus.html'))
 app.get('/raw',            sendfile('client-demo-raw.html'))
-app.get('/net-client.js',  sendfile('net-client.js'))
+app.get('/feed-client.js', sendfile('feed-client.js'))
 
-// Serve users from Statebus
-app.all('/user*', bus.http_in)
-app.all('/current_user/*', bus.http_in)
+// // Serve users from Statebus
+// app.all('/user*', bus.http_in)
+// app.all('/current_user/*', bus.http_in)
 
 // Serve js files
 app.use('/js/statebus', express.static('node_modules/statebus'))

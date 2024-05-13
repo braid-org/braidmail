@@ -1,32 +1,109 @@
 <script type=coffee>
 state.feed = []
 
+icon_size = 34
+post_width = 550
+actual_post_width = post_width + 13 * 2
+
 dom.BODY = ->
   DIV {},
-
     H1 'Braidmail'
-    'You can view the raw ', A(href: "/feed", '/feed'), ' or play with the UI below.'
-    H2 'Feed'
+    'You can also view the raw ', A(href: "/feed", '/feed'), '.'
+    DIV height: 20
     NEW_POST()
     FEED()
   
 FEED = ->
   DIV {},
     for post in state.feed
-      DIV marginBottom: 5,
-        SPAN width: 70, display: 'inline-block',
-          A(href: post.url, CODE({style: fontSize: 8}, post.url))
-        SPAN paddingRight: 10, B post.subject
-        SPAN for p in post.body.split('\n') then [p, BR()]
+      POST post
       
-NEW_POST = ->
+dom.NEW_POST = ->
   DIV {},
-    TEXTAREA id: 'subject', placeholder: 'subject'
-    TEXTAREA id: 'body', placeholder: 'body'
-    INPUT type: 'button', value: 'new post', onClick: -> make_new_post()
+    # TEXTAREA id: 'subject', placeholder: 'subject'
+    IMG
+      src: state.users?['mike@braid.org'].pic
+      width: icon_size
+      height: icon_size
+      position: 'absolute'
+    AUTOSIZEBOX
+      id: 'body'
+      placeholder: 'say stuff here'
+      width: actual_post_width
+      marginLeft: icon_size
+      padding: '7px 13px'
+      borderColor: '#aaa'
+      # backgroundColor: '#eee'
+      value: state.new_post
+      onChange: (e) -> state.new_post = e.target.value
+      onKeyDown: (e) ->
+        if (e.keyCode == 13 and (e.ctrlKey or e.shiftKey or e.metaKey))
+          e.preventDefault()
+          e.stopPropagation()
+          make_new_post()
+    DIV
+      width: actual_post_width + icon_size
+      height: 40
+      INPUT
+        float: 'right'
+        type: 'button'
+        value: 'Post'
+        onClick: -> make_new_post()
+
+POST = (post) ->
+  body = post.body.split('\n')
+  DIV
+    marginBottom: 2
+    IMG
+      src: state.users['mike@braid.org'].pic
+      width: icon_size
+      height: icon_size
+      position: 'absolute'
+    DIV
+      width: post_width
+      marginLeft: icon_size
+      padding: '8px 13px'
+      backgroundColor: '#eee'
+      position: 'relative'
+      if post.subject then B(paddingRight: 13, post.subject)
+      body[0]
+      for p in body.slice(1)
+        DIV p
+
+      # Little url link
+      CODE
+        position: 'absolute'
+        right: 2
+        bottom: 2
+        fontSize: 5
+        A(href: post.url, color: '#aaa', textDecoration: 'none', post.url)
 
 threads = ->
   state.feed.slice().reverse()
+
+
+## An auto-resizing <textarea>
+dom.AUTOSIZEBOX = ->
+  props = bus.clone(@props)
+  props.ref = 'textbox'
+  props.rows = 1
+  delete props['data-widget']
+  delete props['data-key']
+  TEXTAREA(props)
+
+dom.AUTOSIZEBOX.up = ->
+  target = @refs.textbox.getDOMNode()
+  resizebox(target)
+
+dom.AUTOSIZEBOX.refresh = ->
+  target = @refs.textbox.getDOMNode()
+  resizebox(target)
+
+resizebox = (target) ->
+  while (target.rows > 1 && target.scrollHeight < target.offsetHeight)
+    target.rows--
+  while (target.scrollHeight > target.offsetHeight && target.rows < 10000)
+    target.rows++
 
 </script>
 
@@ -52,18 +129,35 @@ client.subscribe_to_feed('/feed', feed => state.feed = feed)
 // Make new post
 window.make_new_post = () => {
   client.make_new_post('', {
-    subject: document.getElementById('subject').value,
+    subject: document.getElementById('subject')?.value,
     body: document.getElementById('body').value
   })
 
   // Now clear the form
-  document.getElementById('subject').value = ''
+  // document.getElementById('subject').value = ''
   document.getElementById('body').value = ''
 }
+
+
+import * as braid from 'https://esm.sh/braid-http?dev'
+
+// Load the users
+function subscribe_to_users (url) {
+  var retry = () => setTimeout(() => subscribe_to_users(url), 3000)
+  try {
+    braid.fetch(url, {subscribe: true}).then(
+      res => res.subscribe(update => state.users = JSON.parse(update.body), retry)
+    )
+  }
+  catch (e) { console.error('bad thing', e); retry() }
+}
+
+subscribe_to_users('/users')
 
 </script>
 <style>
 body, p, input, textarea {
   font-family: avenext, avenir, avenir next, sans;
+  font-size: 13px;
 }
 </style>
