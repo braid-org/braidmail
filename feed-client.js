@@ -104,7 +104,7 @@ function fetch_posts (feed, cb) {
     }
 }
 
-function make_new_post (host, {subject, body = '', date, from, to, cc}) {
+function make_new_post (host, {subject, body = '', date, from, to, cc, in_reply_to}) {
     // Generate a random ID
     var id = Math.random().toString(36).substr(6)
 
@@ -113,10 +113,15 @@ function make_new_post (host, {subject, body = '', date, from, to, cc}) {
     to   ??= ['public']
     cc   ??= []
 
+    console.log('Making new post',
+                { from, to, cc, date, subject, body,
+                               'in-reply-to': in_reply_to })
+
     // Post it to the server
     braid.fetch(host + '/post/' + id, {
         method: 'PUT',
-        body: JSON.stringify({ from, to, cc, date, subject, body })
+        body: JSON.stringify({ from, to, cc, date, subject, body,
+                               'in-reply-to': in_reply_to })
     })
 }
 

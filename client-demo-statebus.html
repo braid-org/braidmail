@@ -1,5 +1,6 @@
 <script type=coffee>
 state.feed = []
+state.replying_to = {}
 
 icon_size = 34
 post_width = 550
@@ -82,20 +83,50 @@ POST = (post) ->
       padding: '8px 13px'
       backgroundColor: '#eee'
       position: 'relative'
+
+      # Subject
       if post.subject then B(paddingRight: 13, post.subject)
+
+      # Body
       body[0]
       for p in body.slice(1)
         DIV p
-
-      # DIV post.bump_date and new Date(post.bump_date).toLocaleString()
 
       # Little url link
       CODE
         position: 'absolute'
         right: 2
-        bottom: 2
+        top: 2
         fontSize: 5
         A(href: post.url, color: '#aaa', textDecoration: 'none', post.url)
+
+      # Reply icon
+      IMG
+        src: '/reply-icon.png'
+        width: icon_size / 2
+        position: 'absolute'
+        right: 2
+        bottom: 2
+        opacity: .3
+        cursor: 'pointer'
+        onClick: -> state.replying_to[post.url] = {}
+    if state.replying_to[post.url]
+      AUTOSIZEBOX
+        width: actual_post_width
+        marginLeft: icon_size
+        padding: '8px 13px'
+        backgroundColor: '#eee'
+        position: 'relative'
+        placeholder: 'type a reply'
+        value: state.replying_to[post.url].message or ''
+        onChange: (e) ->
+          state.replying_to[post.url].message = e.target.value
+        onKeyDown: (e) ->
+          if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
+            e.preventDefault()
+            e.stopPropagation()
+            send_reply(post)
+
 
 make_threads = () ->
   # Create Threads:
@@ -128,7 +159,7 @@ make_threads = () ->
   for url, post of threads
     parent = post['in-reply-to']
     if parent and threads[parent]
-      console.log('adding post', post, 'to parent', parent)
+      # console.log('adding post', post, 'to parent', parent)
       delete threads[post.url]
       threads[parent].children[post.url] = post
       bump_thread(post)
@@ -209,6 +240,18 @@ window.make_new_post = () => {
   // Now clear the form
   // document.getElementById('subject').value = ''
   document.getElementById('body').value = ''
+}
+
+window.send_reply = (post) => {
+  client.make_new_post('', {
+    to: ['public'],
+    from: ['mike@braid.org'],
+    in_reply_to: post.url,
+    body: state.replying_to[post.url].message,
+    date: new Date().getTime()
+  })
+
+  delete state.replying_to[post.url]
 }
 
 

@@ -15,6 +15,7 @@ app.get('/',               sendfile('client-demo-statebus.html'))
 app.get('/raw',            sendfile('client-demo-raw.html'))
 app.get('/feed-client.js', sendfile('feed-client.js'))
 app.use('/js/statebus',    express.static('node_modules/statebus'))
+app.get('/reply-icon.png', sendfile('reply-icon.png'))
 
 // // Serve users from Statebus
 // app.all('/user*', bus.http_in)
