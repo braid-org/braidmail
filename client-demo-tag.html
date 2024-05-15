@@ -35,6 +35,7 @@ You can view the raw <a href="/feed">/feed</a>, or play with the UI below.
   })
 
   $.when('submit', '#new-post', (event) => {
+    event.preventDefault()
     const { subject, body } = event.target
 
     client.make_new_post('', {
