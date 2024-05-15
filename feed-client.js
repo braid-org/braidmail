@@ -7,7 +7,6 @@ var feed = [],
 
 
 async function subscribe_to_feed (url, cb) {
-
     var retry = () => setTimeout(() => subscribe_to_feed(url, cb), 3000)
 
     // Do the initial fetch
@@ -29,8 +28,8 @@ async function subscribe_to_feed (url, cb) {
             })
 
             // And poll again
-            console.log('Polling!  Waiting 30 seconds...')
-            setTimeout(retry, 30 * 1000)
+            console.log('Polling!  Waiting 90 seconds...')
+            setTimeout(retry, 90 * 1000)
         }
     }
     catch (e) { retry() }
@@ -60,14 +59,30 @@ async function subscribe_to_feed (url, cb) {
     }
 }
 
-async function fetch_post (url) {
-    console.log('fetching post', url)
-    // Todo: subscribe to changes in posts
-    var res = await braid.fetch(url)
-    if (res.status === 200)
-        return await res.text()
-    else
-        return undefined
+async function fetch_post (url, cb) {
+    var retry = () => setTimeout(() => fetch_post(url, cb), 3000)
+    // console.log('fetching post', url)
+    try {
+        var res = await braid.fetch(url, /*{subscribe: true}*/)
+
+        // Server might support subscriptions
+        if (res.headers.has('subscribe'))
+            res.subscribe(update => {
+                console.log('got update post!!', update)
+                cb(JSON.parse(update.body))
+            }, retry)
+
+        // Else just do polling
+        else {
+            // Incorporate this update we got
+            cb(JSON.parse(await res.text()))
+
+            // // And poll again
+            // console.log('Polling!  Waiting 90 seconds...')
+            // setTimeout(retry, 90 * 1000)
+        }
+    }
+    catch (e) { retry() }
 }
   
 function fetch_posts (feed, cb) {
@@ -80,50 +95,55 @@ function fetch_posts (feed, cb) {
 
     // Fetch all missing posts
     for (let link in posts)
-        if (!posts[link])
-            fetch_post(link).then( post => {
-                try {
-                    post = JSON.parse(post)
-                } catch (e) {
-                    console.error('Error parsing post', {link, post})
-                    return
-                }
+        if (!posts[link]) {
+            posts[link] = 'pending'
+            fetch_post(link, post => {
                 posts[link] = post
                 var new_feed = compile_posts()
                 cb(new_feed)
             })
+        }
 
     function compile_posts () {
         var result = []
         for (var i=0; i<feed.length; i++) {
             var post = posts[feed[i].link]
-            if (post)
+            if (post && post !== 'pending')
                 result.push({url: feed[i].link, ...post})
         }
         return result
     }
 }
 
-function make_new_post (host, {subject, body = '', date, from, to, cc, in_reply_to}) {
+function make_new_post (host, params) {
     // Generate a random ID
-    var id = Math.random().toString(36).substr(6)
+    params.url = host + '/post/' + Math.random().toString(36).substr(6)
+    put_post(params)
+}
 
-    date ??= new Date().getTime()
-    from ??= ['anonymous']
-    to   ??= ['public']
-    cc   ??= []
+function put_post (params) {
+    console.log('PUT post', params)
 
-    console.log('Making new post',
-                { from, to, cc, date, subject, body,
-                               'in-reply-to': in_reply_to })
+    params.date ??= new Date().getTime()
+    params.from ??= ['anonymous']
+    params.to   ??= ['public']
+    params.cc   ??= []
+
+    if (!params.url) throw new Error('Need a url to put!')
+    if (params.body === undefined) throw new Error('Need a body to put!')
+
+    // Filter it down
+    var filtered_params =
+        (   ({ from, to, cc, date, subject, body }) =>
+            ({ from, to, cc, date, subject, body })     )(params)
+
+    filtered_params['in-reply-to'] = params['in-reply-to']
 
     // Post it to the server
-    braid.fetch(host + '/post/' + id, {
+    braid.fetch(params.url, {
         method: 'PUT',
-        body: JSON.stringify({ from, to, cc, date, subject, body,
-                               'in-reply-to': in_reply_to })
+        body: JSON.stringify(filtered_params)
     })
 }
 
-
-export { subscribe_to_feed, make_new_post }
+export { subscribe_to_feed, make_new_post, put_post }
