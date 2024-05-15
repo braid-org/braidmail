@@ -53,7 +53,8 @@ dom.NEW_POST = ->
       # backgroundColor: '#eee'
       value: state.new_post
       onChange: (e) -> state.new_post = e.target.value
-      onKeyDown: (e) -> if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
+      onKeyDown: (e) -> if (state.new_post \
+                            and e.keyCode == 13 and (e.ctrlKey or e.metaKey))
                            e.preventDefault()
                            e.stopPropagation()
                            make_new_post()
@@ -111,22 +112,30 @@ POST = (post) ->
         cursor: 'pointer'
         onClick: -> state.replying_to[post.url] = {}
     if state.replying_to[post.url]
-      AUTOSIZEBOX
-        width: actual_post_width
-        marginLeft: icon_size
-        padding: '8px 13px'
-        backgroundColor: '#eee'
-        position: 'relative'
-        placeholder: 'type a reply'
-        value: state.replying_to[post.url].message or ''
-        onChange: (e) ->
-          state.replying_to[post.url].message = e.target.value
-        onKeyDown: (e) ->
-          if (e.keyCode == 13 and (e.ctrlKey or e.metaKey))
-            e.preventDefault()
-            e.stopPropagation()
-            send_reply(post)
-
+      DIV
+        width: actual_post_width + icon_size
+        AUTOSIZEBOX
+          width: actual_post_width
+          marginLeft: icon_size
+          padding: '8px 13px'
+          backgroundColor: '#eee'
+          position: 'relative'
+          placeholder: 'type a reply'
+          value: state.replying_to[post.url].message or ''
+          onChange: (e) ->
+            state.replying_to[post.url].message = e.target.value
+          onKeyDown: (e) ->
+            if (state.replying_to[post.url].message \
+                and e.keyCode == 13 and (e.ctrlKey or e.metaKey))
+              e.preventDefault()
+              e.stopPropagation()
+              send_reply(post)
+        DIV height: 30, INPUT
+          float: 'right'
+          type: 'button'
+          value: 'Post'
+          onClick: -> send_reply(post)
+          disabled: (state.replying_to[post.url].message or '').length == 0
 
 make_threads = () ->
   # Create Threads:
