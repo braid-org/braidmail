@@ -168,8 +168,10 @@ make_threads = () ->
   #      - Update thread_bump_time up to root
   bump_thread = (post) ->
     bump_date = post.date
-    while posts[post['in-reply-to']]
+    while true
       post.bump_date = bump_date
+      if not (post['in-reply-to'] and posts[post['in-reply-to']])
+        return
       post = posts[post['in-reply-to']]
 
   for url, post of threads
