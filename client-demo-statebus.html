@@ -133,6 +133,7 @@ make_threads = () ->
   #
   #  - Make hash of threads
   threads = {}
+  posts = {}
 
   if not state.feed or state.feed.length == 0
     return []
@@ -141,9 +142,14 @@ make_threads = () ->
   #    - with empty children hash
   #    - and thread-bump-date
   for post in state.feed
-    threads[post.url] = Object.assign({}, post)
-    threads[post.url].children = {}
-    threads[post.url].bump_date = post.date or 631209355000
+    post = Object.assign({}, post)    # Clone post so we can muck with it
+    posts[post.url] = post
+    posts[post.url].children = {}
+    posts[post.url].bump_date = post.date or 631209355000
+
+    # Initialize threads with all posts as thread roots, then we'll remove
+    # them as we discover parentage
+    threads[post.url] = post
 
   # console.log('Initialized threads are', threads)
   
@@ -152,16 +158,16 @@ make_threads = () ->
   #      - Update thread_bump_time up to root
   bump_thread = (post) ->
     bump_date = post.date
-    while threads[post['in-reply-to']]
+    while posts[post['in-reply-to']]
       post.bump_date = bump_date
-      post = threads[post['in-reply-to']]
+      post = posts[post['in-reply-to']]
 
   for url, post of threads
     parent = post['in-reply-to']
-    if parent and threads[parent]
+    if parent and posts[parent]
       # console.log('adding post', post, 'to parent', parent)
       delete threads[post.url]
-      threads[parent].children[post.url] = post
+      posts[parent].children[post.url] = post
       bump_thread(post)
 
   # console.log('Populated & bumped threads are', threads)
