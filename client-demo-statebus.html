@@ -113,8 +113,8 @@ POST = (post) ->
         if post.subject then B(paddingRight: 13, post.subject)
 
         # Body
-        body[0]
-        for p in body.slice(1)
+        # body[0]
+        for p in body
           DIV p or ' '
 
         # Little url link
