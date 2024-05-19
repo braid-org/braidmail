@@ -1,15 +1,30 @@
 var fs = require('fs'),
     express = require('express')
-    app = express(),
     braidmail = require('./index.js')
 
+// Load config
+try {
+    var config = require('./config.js')
+    console.log('Loaded config.js!')
+} catch (e) {
+    console.log('No custom config.js file')
+    var config = {}
+}
+
+
+// If using h2, load express compatibility library
+var app = config.h2 ? require('http2-express-bridge')(express) : express()
+console.log('Serving via HTTP/' + (config.h2 ? '2' : '1'))
+
+
+// Install basic middleware
 app.use(free_the_cors)
 app.use((req, res, next) => {
     console.log(req.method, req.url)
     next()
 })
 
-// Host some simple HTML
+// Host some HTML
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
 app.get('/',               sendfile('client-demo-statebus.html'))
 app.get('/raw',            sendfile('client-demo-raw.html'))
@@ -28,9 +43,11 @@ app.get('/reply-icon.png', sendfile('reply-icon.png'))
 app.use(braidmail)
 
 // Spin up the server
-require('http')
-    .createServer(app)
-    .listen(7465, () => console.log('listening on 7465'))
+var server = config.h2
+    ? require('http2').createSecureServer(config.h2, app)
+    : require('http').createServer(app)
+
+server.listen(7465, () => console.log('listening on 7465'))
 
 // Free the CORS!
 function free_the_cors (req, res, next) {

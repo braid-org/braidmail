@@ -63,7 +63,7 @@ async function fetch_post (url, cb) {
     var retry = () => setTimeout(() => fetch_post(url, cb), 3000)
     // console.log('fetching post', url)
     try {
-        var res = await braid.fetch(url, /*{subscribe: true}*/)
+        var res = await braid.fetch(url, {subscribe: true})
 
         // Server might support subscriptions
         if (res.headers.has('subscribe'))
@@ -77,9 +77,9 @@ async function fetch_post (url, cb) {
             // Incorporate this update we got
             cb(JSON.parse(await res.text()))
 
-            // // And poll again
-            // console.log('Polling!  Waiting 90 seconds...')
-            // setTimeout(retry, 90 * 1000)
+            // And poll again
+            console.log('Polling!  Waiting 90 seconds...')
+            setTimeout(retry, 90 * 1000)
         }
     }
     catch (e) { retry() }
