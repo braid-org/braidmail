@@ -217,7 +217,6 @@ function post_changed (req) {
         if (peer !== req.headers.peer && url === req.url) {
             console.log('Telling peer', peer, 'about new post', url)
             subscriptions[k].sendUpdate({
-                version: curr_version(),
                 body: JSON.stringify(resources[req.url])
             })
         }
