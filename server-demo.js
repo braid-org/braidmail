@@ -32,6 +32,7 @@ app.get('/tag',            sendfile('client-demo-tag.html'))
 app.get('/feed-client.js', sendfile('feed-client.js'))
 app.use('/js/statebus',    express.static('node_modules/statebus'))
 app.use('/tags',           express.static('tags'))
+app.use('/sagas',          express.static('sagas'))
 app.use('/tag.js',         sendfile('tag.js'))
 app.get('/reply-icon.png', sendfile('reply-icon.png'))
 
