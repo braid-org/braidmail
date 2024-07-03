@@ -1,5 +1,3 @@
-import tag from '@braid/tag'
-
 /*
     ^
    <@>
@@ -9,7 +7,6 @@ import tag from '@braid/tag'
   Elve
 */
 
-const $ = tag('braid-saga')
 // normal time converts lines 1:1 from hype to hypertext
 const NORMAL_TIME = Symbol('n-time')
 // property are able to be stored
@@ -17,7 +14,7 @@ const PROP_TIME = Symbol('p-time')
 // actor embeds rich hyper media content
 const ACTOR_TIME = Symbol('a-time')
 
-export function render(script) {
+function render(script) {
   // nothing in, nothing out
   if(!script) return ''
   const state = {}
@@ -194,10 +191,12 @@ export function render(script) {
 
 function validated(htmlString){
   const root = `<xml-html>${htmlString}</xml-html>`
-  const parser = new DOMParser();
+  /*const parser = new DOMParser();
   const doc = parser.parseFromString(root, "application/xml");
   const errorNode = doc.querySelector('parsererror');
   return errorNode ? errorNode.innerHTML : root
+  */
+  return root
 }
 
 const templates = {
@@ -251,3 +250,4 @@ function screenplay(content) {
   `
 }
 
+module.exports = render

@@ -1,6 +1,7 @@
 var fs = require('fs'),
     express = require('express')
     braidmail = require('./index.js')
+    render = require('./tags/saga.js')
 
 // Load config
 try {
@@ -26,13 +27,43 @@ app.use((req, res, next) => {
 
 // Host some HTML
 sendfile = (f) => (req, res) => res.sendFile(f, {root:'.'})
+sagaRender = (dir) => (req, res) => {
+  const file = dir + req.url
+  let saga
+  fs.readFile(file, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    res.send(`
+      <head>
+      <script type="importmap">
+        {
+          "imports": {
+            "@braid/mail": "/feed-client.js",
+            "@braid/tag": "/tag.js",
+            "@plan98/modal": "/tags/plan98-modal.js",
+            "braid-http": "https://esm.sh/braid-http@0.3.3"
+          }
+        }
+      </script>
+      </head>
+      <body>
+        ${render(data)}
+        <script src="/js/statebus/statebus.js"></script>
+        <script src="/js/statebus/client-library.js"></script>
+        <script src="/tag.js" type="module"></script>
+      </body>
+    `)
+  });
+}
 app.get('/',               sendfile('client-demo-statebus.html'))
 app.get('/raw',            sendfile('client-demo-raw.html'))
 app.get('/tag',            sendfile('client-demo-tag.html'))
 app.get('/feed-client.js', sendfile('feed-client.js'))
 app.use('/js/statebus',    express.static('node_modules/statebus'))
 app.use('/tags',           express.static('tags'))
-app.use('/sagas',          express.static('sagas'))
+app.use('/sagas',          sagaRender('sagas'))
 app.use('/tag.js',         sendfile('tag.js'))
 app.get('/reply-icon.png', sendfile('reply-icon.png'))
 
