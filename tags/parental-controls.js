@@ -9,6 +9,10 @@ const lolol = [
       {
         label: 'Mail',
         laugh: 'start.saga'
+      },
+      {
+        label: 'Encryption',
+        laugh: 'encryption.saga'
       }
     ]
   },
