@@ -37,13 +37,13 @@ $.draw(target => {
       Public Key 1
     </button>
     <button data-key="publicKey2">
-      Public Key 1
+      Public Key 2
     </button>
     <button data-key="privateKey1">
       Private Key 1
     </button>
     <button data-key="privateKey2">
-      Private Key 1
+      Private Key 2
     </button>
 
     Step 2:
