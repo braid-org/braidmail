@@ -7,13 +7,13 @@ const lolol = [
     label: 'Braid',
     lol: [
       {
+        label: 'Encryption',
+        laugh: 'encryption.saga'
+      },
+      {
         label: 'Mail',
         laugh: 'start.saga'
       },
-      {
-        label: 'Encryption',
-        laugh: 'encryption.saga'
-      }
     ]
   },
 ]
