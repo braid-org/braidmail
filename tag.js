@@ -20,8 +20,17 @@ const observableEvents = [CREATE_EVENT]
 
 function update(link, target, compositor) {
   insight('tag:update', link)
+  if(target.beforeUpdate) {
+    target.beforeUpdate(target)
+  }
+
   const html = compositor(target)
   if(html) target.innerHTML = html
+
+  if(target.afterUpdate) {
+    target.afterUpdate(target)
+  }
+
 }
 
 function draw(link, compositor) {
