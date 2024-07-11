@@ -264,7 +264,7 @@ $.draw(() => {
 $.when('click', '[data-publish]', (event) => {
   showModal(`
     <div style="width: 100%; height: 100%; background: rgba(255,255,255,1); padding: 1rem;"
-      <div style="max-width: 55rem; margin: auto;"
+      <div style="max-width: 55rem; margin: auto;">
         <landing-publish></landing-publish>
       </div>
     </div>
