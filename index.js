@@ -101,6 +101,13 @@ function handler (req, res, next) {
                 res.status = 404
             else {
                 delete resources[req.url]
+
+                // And kill the post in the feed
+                var feed = resources['/feed']
+                for (var i=0; i < feed.length; i++)
+                    if (feed[i].link === req.url)
+                        feed[i] = null
+
                 res.status = 200
                 post_changed(req)
             }
