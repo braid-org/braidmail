@@ -97,15 +97,15 @@ function handler (req, res, next) {
 
         // DELETE /post/*
         else if (req.method === 'DELETE') {
-            if (!req.url in resources)
+            if (!req.url in resources || resources[req.url] === null)
                 res.status = 404
             else {
-                delete resources[req.url]
+                resources[req.url] = null
 
                 // And kill the post in the feed
                 var feed = resources['/feed']
                 for (var i=0; i < feed.length; i++)
-                    if (feed[i].link === req.url)
+                    if (feed[i] && feed[i].link === req.url)
                         feed[i] = null
 
                 res.status = 200
@@ -120,7 +120,7 @@ function handler (req, res, next) {
 //   - and regular GETs
 function getter (req, res) {
     // Make sure URL is valid
-    if (!(req.url in resources)) {
+    if (!(req.url in resources) || resources[req.url] === null) {
         res.statusCode = 404
         res.end()
         return
@@ -128,6 +128,7 @@ function getter (req, res) {
 
     // Set headers
     res.setHeader('content-type', 'application/json')
+    res.setHeader('editable', 'true')
     if (req.url === '/feed') {
         res.setHeader('Version-Type', 'arraystream')
         res.setHeader('Current-Version', curr_version().map(JSON.stringify).join(', '))

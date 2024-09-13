@@ -88,6 +88,8 @@ async function fetch_post (url, cb) {
 function fetch_posts (feed, cb) {
     // Initialize posts hash
     for (var i=0; i<feed.length; i++) {
+        if (!feed[i]) continue        // Skip null posts
+
         var link = feed[i].link
         if (!(link in posts))
             posts[link] = undefined
@@ -107,6 +109,8 @@ function fetch_posts (feed, cb) {
     function compile_posts () {
         var result = []
         for (var i=0; i<feed.length; i++) {
+            if (!feed[i]) continue        // Skip null posts
+
             var post = posts[feed[i].link]
             if (post && post !== 'pending')
                 result.push({url: feed[i].link, ...post})
