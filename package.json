@@ -5,6 +5,7 @@
   "dependencies": {
     "braid-http": "1.1",
     "express": "^4.19.2",
+    "http2-express-bridge": "^1.0.7",
     "statebus": "^7.0.31"
   },
   "files": [
