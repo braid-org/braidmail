@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "repository": "braid-org/braidmail",
   "dependencies": {
-    "braid-http": "^0.3.17",
+    "braid-http": "1.1",
     "express": "^4.19.2",
     "statebus": "^7.0.31"
   },

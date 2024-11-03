@@ -319,7 +319,7 @@ function subscribe_to_users (url) {
   var retry = () => setTimeout(() => subscribe_to_users(url), 3000)
   try {
     braid.fetch(url, {subscribe: true}).then(
-      res => res.subscribe(update => state.users = JSON.parse(update.body), retry)
+      res => res.subscribe(update => state.users = JSON.parse(update.body_text), retry)
     )
   }
   catch (e) { console.error('bad thing', e); retry() }

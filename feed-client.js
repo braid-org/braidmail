@@ -37,9 +37,9 @@ async function subscribe_to_feed (url, cb) {
     function patch_feed (update) {
         console.log('We got a new update!', update)
 
-        if (update.body) {
+        if (update.body_text) {
             // Got a whole new snapshot
-            feed = JSON.parse(update.body)
+            feed = JSON.parse(update.body_text)
             // Reset everything from scratch
             posts = {}
             curr_version = undefined
@@ -69,7 +69,7 @@ async function fetch_post (url, cb) {
         if (res.headers.has('subscribe'))
             res.subscribe(update => {
                 console.log('got update post!!', update)
-                cb(JSON.parse(update.body))
+                cb(JSON.parse(update.body_text))
             }, retry)
 
         // Else just do polling
