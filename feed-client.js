@@ -1,4 +1,4 @@
-import * as braid from 'https://esm.sh/braid-http?dev'
+import * as braid from 'https://esm.sh/braid-http?~1.1'
   
 var feed = [],
     posts = {},
