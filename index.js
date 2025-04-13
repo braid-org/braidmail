@@ -52,6 +52,9 @@ function handler (req, res, next) {
         users_name = '/users'
 
     require('braid-http').http_server(req, res)
+    if (req.is_multiplexer) return
+
+    console.log(`method: ${req.method}, url: ${req.url}`)
 
     // We'll give each request a random ID, if it's not alraedy provided to us
     req.headers.peer ??= Math.random().toString(36).substr(3)

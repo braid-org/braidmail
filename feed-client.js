@@ -17,7 +17,10 @@ async function subscribe_to_feed (url, cb) {
 
         // Server might support subscriptions
         if (res.headers.has('subscribe'))
-            res.subscribe(patch_feed, retry)
+            res.subscribe(patch_feed, (e) => {
+                console.log(`feed sub error: ${e.stack}`)
+                retry()
+            })
 
         // Else just do polling
         else {
@@ -48,7 +51,7 @@ async function subscribe_to_feed (url, cb) {
             update.patches.forEach(p => {
                 console.assert(p.unit === 'json')
                 console.assert(p.range === '[-0:-0]')
-                feed = feed.concat(JSON.parse(p.content))
+                feed = feed.concat(JSON.parse(p.content_text))
             })
 
         // Update the current version

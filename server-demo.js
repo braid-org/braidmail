@@ -89,7 +89,6 @@ server.listen(7465, () => console.log('listening on 7465'))
 function free_the_cors (req, res, next) {
     res.setHeader('Range-Request-Allow-Methods', 'PATCH, PUT')
     res.setHeader('Range-Request-Allow-Units', 'json')
-    res.setHeader("Patches", "OK")
     var free_the_cors = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "OPTIONS, HEAD, GET, PUT, UNSUBSCRIBE",

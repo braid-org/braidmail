@@ -312,13 +312,14 @@ window.send_reply = (post) => {
 }
 
 
-import * as braid from 'https://esm.sh/braid-http@~1.1'
+import * as braid from 'https://esm.sh/braid-http@~1.3.40'
+braid.fetch.enable_multiplex = window.location.hash === '#nomux' ? false : {via: 'POST'}
 
 // Load the users
 function subscribe_to_users (url) {
   var retry = () => setTimeout(() => subscribe_to_users(url), 3000)
   try {
-    braid.fetch(url, {subscribe: true}).then(
+    braid.fetch(url, {subscribe: true, retry: true}).then(
       res => res.subscribe(update => state.users = JSON.parse(update.body_text), retry)
     )
   }
