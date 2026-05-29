@@ -1,6 +1,6 @@
 {
   "name": "braidmail",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "repository": "braid-org/braidmail",
   "dependencies": {
     "braid-http": "~1.3.73",
@@ -9,6 +9,12 @@
     "statebus": "^7.1.2"
   },
   "files": [
-    "index.js"
+    "client/feed-client.js",
+    "client/feed-client.mjs",
+    "client/index.html",
+    "client/raw.html",
+    "client/reply-icon.png",
+    "server/index.js",
+    "server/demo-app.js"
   ]
 }

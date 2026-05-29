@@ -1,7 +1,6 @@
 var fs = require('fs'),
     express = require('express')
     braidmail = require('./index.js')
-    render = require('./tags/saga.js')
 
 // Load config
 try {
@@ -41,8 +40,6 @@ sagaRender = (dir) => (req, res) => {
         {
           "imports": {
             "@braid/mail": "/feed-client.js",
-            "@braid/tag": "/tag.js",
-            "@plan98/modal": "/tags/plan98-modal.js",
             "braid-http": "https://esm.sh/braid-http@~1.1"
           }
         }
@@ -57,19 +54,12 @@ sagaRender = (dir) => (req, res) => {
     `)
   });
 }
-app.get('/',               sendfile('client-demo-statebus.html'))
-app.get('/raw',            sendfile('client-demo-raw.html'))
-app.get('/tag',            sendfile('client-demo-tag.html'))
+app.get('/',               sendfile('client/client-demo-statebus.html'))
+app.get('/raw',            sendfile('client/client-demo-raw.html'))
 app.get('/feed-client.js', sendfile('feed-client.js'))
 app.use('/js/statebus',    express.static('node_modules/statebus'))
-app.use('/js/webcrypto',    express.static('node_modules/webcrypto'))
-app.use('/tags',           express.static('tags'))
-app.use('/sagas',          sagaRender('sagas'))
 app.use('/tag.js',         sendfile('tag.js'))
 app.get('/reply-icon.png', sendfile('reply-icon.png'))
-app.get('/vendor/sjcl.js', sendfile('./vendor/sjcl.js'))
-app.get('/vendor/ecc.js', sendfile('./vendor/ecc.js'))
-app.get('/vendor/bn.js', sendfile('./vendor/bn.js'))
 
 // // Serve users from Statebus
 // app.all('/user*', bus.http_in)
